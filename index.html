@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SauceNime</title>
+  <link rel="icon" href="/thumbnail.jpg"/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #08080e;
+      --surface: rgba(255,255,255,0.04);
+      --surface-h: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.07);
+      --border-s: rgba(255,255,255,0.13);
+      --text: #f2f2f7;
+      --muted: rgba(242,242,247,0.45);
+      --dim: rgba(242,242,247,0.2);
+      --accent: #bf5af2;
+      --accent2: #7c3aed;
+      --accent-dim: rgba(191,90,242,0.12);
+      --pink: #ff375f;
+      --shadow: 0 12px 48px rgba(0,0,0,0.8);
+      --r: 18px; --r-sm: 11px;
+    }
+    [data-theme="light"] {
+      --bg: #f0eef8;
+      --surface: rgba(255,255,255,0.7);
+      --surface-h: rgba(255,255,255,0.9);
+      --border: rgba(0,0,0,0.07);
+      --border-s: rgba(0,0,0,0.13);
+      --text: #08080e;
+      --muted: rgba(8,8,14,0.5);
+      --dim: rgba(8,8,14,0.22);
+      --shadow: 0 12px 48px rgba(0,0,0,0.1);
+    }
+    html, body { min-height: 100vh; font-family: 'Geist', sans-serif; background: var(--bg); color: var(--text); transition: background 0.35s, color 0.35s; overflow-x: hidden; }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 10%, rgba(191,90,242,0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 55% at 80% 90%, rgba(255,55,95,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 60% 40%, rgba(124,58,237,0.05) 0%, transparent 60%);
+    }
+    [data-theme="light"] body::before { opacity: 0.5; }
+    .wrap { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 40px 18px 80px; display: flex; flex-direction: column; gap: 24px; }
+    nav { display: flex; align-items: center; justify-content: space-between; animation: up 0.4s ease both; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 36px; height: 36px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-s); flex-shrink: 0; }
+    .brand-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .brand-name { font-family: 'Geist Mono', monospace; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+    .brand-name em { font-style: normal; color: var(--accent); }
+    .theme-btn { width: 42px; height: 25px; background: var(--surface); border: 1px solid var(--border-s); border-radius: 100px; cursor: pointer; position: relative; backdrop-filter: blur(12px); transition: background 0.3s; flex-shrink: 0; }
+    .theme-btn::after { content: ''; position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; border-radius: 50%; background: var(--text); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    [data-theme="light"] .theme-btn::after { transform: translateX(17px); }
+    .hero { text-align: center; padding: 16px 0 8px; animation: up 0.4s 0.07s ease both; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; background: var(--accent-dim); border: 1px solid rgba(191,90,242,0.22); border-radius: 100px; font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+    .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.7); } }
+    .hero h1 { font-size: clamp(32px,9vw,58px); font-weight: 300; line-height: 1.08; letter-spacing: -0.04em; margin-bottom: 12px; }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero h1 strong { font-weight: 700; }
+    .hero p { font-size: 13px; color: var(--muted); max-width: 380px; margin: 0 auto; line-height: 1.7; }
+    .search-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); backdrop-filter: blur(28px) saturate(1.5); -webkit-backdrop-filter: blur(28px) saturate(1.5); box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.055); overflow: hidden; animation: up 0.4s 0.13s ease both; }
+    [data-theme="light"] .search-card { box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.9); }
+    .search-inner { padding: 20px; display: flex; gap: 8px; }
+    .search-input { flex: 1; padding: 13px 16px; background: var(--surface-h); border: 1px solid var(--border-s); border-radius: var(--r-sm); font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--text); outline: none; transition: border-color 0.2s; }
+    .search-input::placeholder { color: var(--dim); }
+    .search-input:focus { border-color: var(--accent); }
+    .search-btn { padding: 0 20px; background: var(--accent); border: none; border-radius: var(--r-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s, transform 0.15s; }
+    .search-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .search-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+    .search-btn svg { width: 18px; height: 18px; stroke: #fff; stroke-width: 2; fill: none; }
+    .divider { height: 1px; background: var(--border); }
+    .loading-row { padding: 16px 20px; display: none; align-items: center; gap: 10px; }
+    .loading-row.show { display: flex; }
+    .spinner { width: 16px; height: 16px; border: 2px solid var(--border-s); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
+    .results-section { display: none; flex-direction: column; gap: 12px; animation: up 0.35s ease both; }
+    .results-section.show { display: flex; }
+    .results-label { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .anime-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); backdrop-filter: blur(20px); overflow: hidden; display: flex; gap: 0; text-decoration: none; color: var(--text); transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), border-color 0.2s; cursor: pointer; }
+    .anime-card:hover { transform: translateY(-2px); border-color: rgba(191,90,242,0.35); }
+    .anime-thumb { width: 72px; height: 100px; object-fit: cover; flex-shrink: 0; background: var(--surface-h); }
+    .anime-info { padding: 12px 14px; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+    .anime-title { font-size: 13px; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .anime-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag { padding: 2px 7px; background: var(--surface-h); border: 1px solid var(--border); border-radius: 100px; font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+    .tag.score { color: var(--accent); border-color: rgba(191,90,242,0.25); background: var(--accent-dim); }
+    .err-msg { display: none; padding: 12px 16px; background: rgba(255,55,95,0.08); border: 1px solid rgba(255,55,95,0.2); border-radius: var(--r-sm); font-family: 'Geist Mono', monospace; font-size: 11px; color: rgba(255,100,130,0.9); }
+    .err-msg.show { display: block; }
+    footer { text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; }
+    @keyframes up { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand">
+      <div class="brand-logo"><img src="/thumbnail.jpg" alt="SauceNime"/></div>
+      <div class="brand-name">Sauce<em>Nime</em></div>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button"></button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-badge"><span class="badge-dot"></span> Anime Downloader</div>
+    <h1>Watch <em>anime.</em><br><strong>Your way.</strong></h1>
+    <p>Stream via Pixeldrain or download via MediaFire — no signup, no ads, no cap.</p>
+  </div>
+
+  <div class="search-card">
+    <div class="search-inner">
+      <input class="search-input" id="searchInput" type="text" placeholder="Search anime title..." autocomplete="off" spellcheck="false"/>
+      <button class="search-btn" id="searchBtn" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+    </div>
+    <div class="divider"></div>
+    <div class="loading-row" id="loadingRow">
+      <div class="spinner"></div>
+      <div class="loading-text">Searching...</div>
+    </div>
+  </div>
+
+  <div class="err-msg" id="errMsg"></div>
+
+  <div class="results-section" id="resultsSection">
+    <div class="results-label" id="resultsLabel"></div>
+    <div id="resultsList"></div>
+  </div>
+
+  <footer>SauceNime &mdash; Azazel Codes</footer>
+</div>
+
+<script>
+(function() {
+  var html = document.documentElement;
+  html.setAttribute('data-theme', localStorage.getItem('sn-theme') || 'dark');
+  document.getElementById('themeBtn').addEventListener('click', function() {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sn-theme', next);
+  });
+
+  var searchInput = document.getElementById('searchInput');
+  var searchBtn = document.getElementById('searchBtn');
+  var loadingRow = document.getElementById('loadingRow');
+  var errMsg = document.getElementById('errMsg');
+  var resultsSection = document.getElementById('resultsSection');
+  var resultsList = document.getElementById('resultsList');
+  var resultsLabel = document.getElementById('resultsLabel');
+
+  function doSearch() {
+    var q = searchInput.value.trim();
+    if (!q) return;
+
+    errMsg.classList.remove('show');
+    resultsSection.classList.remove('show');
+    loadingRow.classList.add('show');
+    searchBtn.disabled = true;
+
+    fetch('/api/search?q=' + encodeURIComponent(q))
+      .then(function(r) { if (!r.ok) throw new Error('Request failed'); return r.json(); })
+      .then(function(data) {
+        loadingRow.classList.remove('show');
+        searchBtn.disabled = false;
+
+        if (!data.length) {
+          errMsg.textContent = 'No results found for "' + q + '"';
+          errMsg.classList.add('show');
+          return;
+        }
+
+        resultsLabel.textContent = data.length + ' results for "' + q + '"';
+        resultsList.innerHTML = '';
+
+        data.forEach(function(item) {
+          var card = document.createElement('a');
+          card.className = 'anime-card';
+          card.href = '/anime?url=' + encodeURIComponent(item.url);
+
+          var img = document.createElement('img');
+          img.className = 'anime-thumb';
+          img.src = item.image || '';
+          img.alt = item.title;
+          img.onerror = function() { this.style.background = 'var(--surface-h)'; this.style.width = '72px'; };
+
+          var info = document.createElement('div');
+          info.className = 'anime-info';
+
+          var title = document.createElement('div');
+          title.className = 'anime-title';
+          title.textContent = item.title || 'Unknown';
+
+          var tags = document.createElement('div');
+          tags.className = 'anime-tags';
+
+          if (item.type) { var t = document.createElement('span'); t.className = 'tag'; t.textContent = item.type; tags.appendChild(t); }
+          if (item.status) { var s = document.createElement('span'); s.className = 'tag'; s.textContent = item.status; tags.appendChild(s); }
+          if (item.score) { var sc = document.createElement('span'); sc.className = 'tag score'; sc.textContent = item.score; tags.appendChild(sc); }
+
+          info.appendChild(title);
+          info.appendChild(tags);
+          card.appendChild(img);
+          card.appendChild(info);
+          resultsList.appendChild(card);
+        });
+
+        resultsSection.classList.add('show');
+      })
+      .catch(function(err) {
+        loadingRow.classList.remove('show');
+        searchBtn.disabled = false;
+        errMsg.textContent = err.message;
+        errMsg.classList.add('show');
+      });
+  }
+
+  searchBtn.addEventListener('click', doSearch);
+  searchInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
+})();
+</script>
+</body>
+  </html>
+  
