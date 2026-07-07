@@ -97,6 +97,304 @@
     .video-wrap { display: none; }
     .video-wrap.show { display: block; }
     video { width: 100%; border-radius: var(--r-sm); background: #000; }
+    .modal-actions { display: none; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .modal-actions.show { display: flex; }
+    .action-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 20px; border-radius: var(--r-sm); text-decoration: none; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.15s; border: 1px solid; }
+    .action-btn.dl { background: rgba(255,55,95,0.08); border-color: rgba(255,55,95,0.25); color: var(--pink); }
+    .action-btn.dl:hover { background: rgba(255,55,95,0.16); transform: translateY(-1px); }
+    .action-btn.copy { background: var(--accent-dim); border-color: rgba(191,90,242,0.25); color: var(--accent); }
+    .action-btn.copy:hover { background: rgba(191,90,242,0.2); transform: translateY(-1px); }
+    .action-btn svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+    .err-modal { display: none; padding: 12px 14px; background: rgba(255,55,95,0.08); border: 1px solid rgba(255,55,95,0.2); border-radius: var(--r-sm); font-family: 'Geist Mono', monospace; font-size: 11px; color: rgba(255,100,130,0.9); }
+    .err-modal.show { display: block; }
+
+    footer { text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; }
+    @keyframes up { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="/">
+      <div class="brand-logo"><img src="/thumbnail.jpg" alt="SauceNime"/></div>
+      <div class="brand-name">Sauce<em>Nime</em></div>
+    </a>
+    <button class="theme-btn" id="themeBtn" type="button"></button>
+  </nav>
+
+  <div id="pageContent">
+    <div class="page-loading" id="pageLoading">
+      <div class="spinner"></div>
+      <div class="spinner-text">Loading anime...</div>
+    </div>
+  </div>
+
+  <footer>SauceNime &mdash; Azazel Codes</footer>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Loading...</div>
+      <button class="modal-close" id="modalClose" type="button">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-loading" id="modalLoading">
+        <div class="spinner"></div>
+        <div class="modal-loading-text">Resolving link...</div>
+      </div>
+      <div class="err-modal" id="errModal"></div>
+      <div class="video-wrap" id="videoWrap">
+        <video id="videoPlayer" controls playsinline></video>
+      </div>
+      <div class="modal-actions" id="modalActions">
+        <a class="action-btn dl" id="dlBtnModal" href="#" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download File
+        </a>
+        <button class="action-btn copy" id="copyLinkBtn" type="button">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Streaming Link
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var html = document.documentElement;
+  html.setAttribute('data-theme', localStorage.getItem('sn-theme') || 'dark');
+  document.getElementById('themeBtn').addEventListener('click', function() {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sn-theme', next);
+  });
+
+  var params = new URLSearchParams(location.search);
+  var animeUrl = params.get('url');
+
+  if (!animeUrl) {
+    location.href = '/';
+    return;
+  }
+
+  fetch('/api/detail?url=' + encodeURIComponent(animeUrl))
+    .then(function(r) { if (!r.ok) throw new Error('Failed to load'); return r.json(); })
+    .then(function(d) {
+      document.title = (d.title || 'Anime') + ' — SauceNime';
+      renderPage(d);
+    })
+    .catch(function(err) {
+      document.getElementById('pageLoading').innerHTML = '<div style="font-family:Geist Mono,monospace;font-size:12px;color:rgba(255,100,130,0.9)">Failed to load: ' + err.message + '</div>';
+    });
+
+  function renderPage(d) {
+    var content = document.getElementById('pageContent');
+
+    var html_str = '';
+
+    // Hero card
+    var metaRows = '';
+    if (d.status) metaRows += metaRow('Status', d.status);
+    if (d.type) metaRows += metaRow('Type', d.type);
+    if (d.studio) metaRows += metaRow('Studio', d.studio);
+    if (d.released) metaRows += metaRow('Released', d.released);
+    if (d.duration) metaRows += metaRow('Duration', d.duration);
+    if (d.episodes) metaRows += metaRow('Episodes', d.episodes);
+    if (d.subtitle) metaRows += metaRow('Sub', d.subtitle);
+
+    var genreTags = (d.genre || []).map(function(g) { return '<span class="genre-tag">' + esc(g) + '</span>'; }).join('');
+
+    content.innerHTML =
+      '<div class="card" style="animation:up 0.4s ease both;">' +
+        '<div class="anime-hero">' +
+          '<img class="anime-cover" src="' + esc(d.image || '') + '" alt="' + esc(d.title || '') + '" onerror="this.style.background=\'var(--surface-h)\'">' +
+          '<div class="anime-head">' +
+            '<div class="anime-title-main">' + esc(d.title || '') + '</div>' +
+            (d.alternative ? '<div class="anime-alt">' + esc(d.alternative) + '</div>' : '') +
+            (d.score ? '<div class="anime-score">' + esc(d.score) + '</div>' : '') +
+            '<div class="meta-grid">' + metaRows + '</div>' +
+          '</div>' +
+        '</div>' +
+        (genreTags ? '<div class="divider"></div><div class="genre-wrap">' + genreTags + '</div>' : '') +
+        (d.synopsis ? '<div class="divider"></div><div class="synopsis-wrap"><div class="section-label">Synopsis</div><div class="synopsis-text">' + esc(d.synopsis).replace(/\n\n/g, '<br><br>') + '</div></div>' : '') +
+      '</div>';
+
+    // Episode list
+    if (d.episodeList && d.episodeList.length) {
+      var epWrap = document.createElement('div');
+      epWrap.className = 'episodes-wrap';
+
+      var epLabel = document.createElement('div');
+      epLabel.style.cssText = 'font-family:Geist Mono,monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)';
+      epLabel.textContent = d.episodeList.length + ' Episodes';
+      epWrap.appendChild(epLabel);
+
+      d.episodeList.forEach(function(ep) {
+        var card = document.createElement('div');
+        card.className = 'ep-card';
+
+        var header = document.createElement('div');
+        header.className = 'ep-header';
+        header.innerHTML = '<span class="ep-title">' + esc(ep.episode || 'Episode') + '</span>' +
+          '<svg class="ep-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+
+        var body = document.createElement('div');
+        body.className = 'ep-body';
+
+        (ep.download || []).forEach(function(dl) {
+          if (!dl.providers || !dl.providers.length) return;
+
+          var hasPixeldrain = dl.providers.some(function(p) { return p.url && p.url.includes('pixeldrain'); });
+          var hasMediafire = dl.providers.some(function(p) { return p.url && p.url.includes('mediafire'); });
+
+          if (!hasPixeldrain && !hasMediafire) return;
+
+          var resSection = document.createElement('div');
+          resSection.className = 'res-section';
+
+          var resLabel = document.createElement('div');
+          resLabel.className = 'res-label';
+          resLabel.textContent = dl.resolution || 'Unknown';
+          resSection.appendChild(resLabel);
+
+          var provList = document.createElement('div');
+          provList.className = 'provider-list';
+
+          dl.providers.forEach(function(p) {
+            if (!p.url) return;
+            var isPx = p.url.includes('pixeldrain');
+            var isMf = p.url.includes('mediafire');
+            if (!isPx && !isMf) return;
+
+            var btn = document.createElement('button');
+            btn.className = 'provider-btn ' + (isPx ? 'px' : 'mf');
+            btn.textContent = isPx ? 'Pixeldrain' : 'MediaFire';
+            btn.setAttribute('data-url', p.url);
+            btn.setAttribute('data-type', isPx ? 'stream' : 'download');
+            btn.setAttribute('data-ep', ep.episode || '');
+            btn.setAttribute('data-res', dl.resolution || '');
+            btn.addEventListener('click', function() {
+              openModal(this.getAttribute('data-url'), this.getAttribute('data-ep'), this.getAttribute('data-res'));
+            });
+            provList.appendChild(btn);
+          });
+
+          resSection.appendChild(provList);
+          if (resSection.querySelector('.provider-btn')) body.appendChild(resSection);
+        });
+
+        header.addEventListener('click', function() {
+          card.classList.toggle('open');
+        });
+
+        card.appendChild(header);
+        card.appendChild(body);
+        epWrap.appendChild(card);
+      });
+
+      content.appendChild(epWrap);
+    }
+  }
+
+  function metaRow(key, val) {
+    return '<div class="meta-row"><span class="meta-key">' + key + '</span><span class="meta-val">' + esc(val) + '</span></div>';
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Modal
+  var overlay = document.getElementById('modalOverlay');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalLoading = document.getElementById('modalLoading');
+  var errModal = document.getElementById('errModal');
+  var videoWrap = document.getElementById('videoWrap');
+  var videoPlayer = document.getElementById('videoPlayer');
+  var modalActions = document.getElementById('modalActions');
+  var dlBtnModal = document.getElementById('dlBtnModal');
+  var copyLinkBtn = document.getElementById('copyLinkBtn');
+  var currentDirectUrl = '';
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+
+  copyLinkBtn.addEventListener('click', function() {
+    if (!currentDirectUrl) return;
+    navigator.clipboard.writeText(currentDirectUrl).then(function() {
+      copyLinkBtn.textContent = 'Copied!';
+      setTimeout(function() {
+        copyLinkBtn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Streaming Link';
+      }, 2000);
+    }).catch(function() {
+      prompt('Copy link ini:', currentDirectUr    [data-theme="light"] .card { box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.9); }
+    .divider { height: 1px; background: var(--border); }
+
+    /* Loading */
+    .page-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 40vh; gap: 14px; }
+    .spinner { width: 28px; height: 28px; border: 2px solid var(--border-s); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-text { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+    /* Hero */
+    .anime-hero { display: flex; gap: 18px; padding: 20px; align-items: flex-start; }
+    .anime-cover { width: 110px; height: 155px; border-radius: 10px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border-s); background: var(--surface-h); }
+    .anime-head { flex: 1; min-width: 0; }
+    .anime-title-main { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; letter-spacing: -0.02em; }
+    .anime-alt { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 10px; }
+    .anime-score { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; background: var(--accent-dim); border: 1px solid rgba(191,90,242,0.25); border-radius: 100px; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 10px; }
+    .meta-grid { display: flex; flex-direction: column; gap: 4px; }
+    .meta-row { display: flex; gap: 6px; font-family: 'Geist Mono', monospace; font-size: 10px; }
+    .meta-key { color: var(--dim); width: 68px; flex-shrink: 0; letter-spacing: 0.06em; text-transform: uppercase; }
+    .meta-val { color: var(--muted); }
+
+    /* Genre */
+    .genre-wrap { padding: 14px 20px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .genre-tag { padding: 3px 10px; background: var(--surface-h); border: 1px solid var(--border); border-radius: 100px; font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+    /* Synopsis */
+    .synopsis-wrap { padding: 16px 20px; }
+    .section-label { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .synopsis-text { font-size: 12px; color: var(--muted); line-height: 1.8; }
+
+    /* Episodes */
+    .episodes-wrap { display: flex; flex-direction: column; gap: 10px; }
+    .ep-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; backdrop-filter: blur(16px); }
+    .ep-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s; }
+    .ep-header:hover { background: var(--surface-h); }
+    .ep-title { font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text); }
+    .ep-chevron { width: 14px; height: 14px; stroke: var(--muted); stroke-width: 2; fill: none; transition: transform 0.25s; flex-shrink: 0; }
+    .ep-card.open .ep-chevron { transform: rotate(180deg); }
+    .ep-body { display: none; border-top: 1px solid var(--border); }
+    .ep-card.open .ep-body { display: block; }
+    .res-section { padding: 10px 16px; }
+    .res-label { font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+    .provider-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .provider-btn { padding: 6px 12px; background: var(--surface-h); border: 1px solid var(--border-s); border-radius: 8px; font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.18s; text-decoration: none; display: inline-block; }
+    .provider-btn:hover { background: var(--accent-dim); color: var(--accent); border-color: rgba(191,90,242,0.3); }
+    .provider-btn.px { color: var(--accent); border-color: rgba(191,90,242,0.3); background: var(--accent-dim); }
+    .provider-btn.mf { color: var(--pink); border-color: rgba(255,55,95,0.3); background: rgba(255,55,95,0.08); }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 18px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--bg); border: 1px solid var(--border-s); border-radius: var(--r); width: 100%; max-width: 680px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.9); animation: up 0.3s ease both; }
+    .modal-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .modal-title { font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text); }
+    .modal-close { width: 28px; height: 28px; background: var(--surface-h); border: 1px solid var(--border-s); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .modal-close svg { width: 12px; height: 12px; stroke: var(--muted); stroke-width: 2; fill: none; }
+    .modal-body { padding: 20px; }
+    .modal-loading { display: flex; align-items: center; gap: 10px; }
+    .modal-loading .spinner { width: 16px; height: 16px; }
+    .modal-loading-text { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); }
+    .video-wrap { display: none; }
+    .video-wrap.show { display: block; }
+    video { width: 100%; border-radius: var(--r-sm); background: #000; }
     .dl-btn-modal { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px 20px; background: rgba(255,55,95,0.1); border: 1px solid rgba(255,55,95,0.25); border-radius: var(--r-sm); text-decoration: none; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--pink); transition: background 0.2s, transform 0.15s; margin-top: 12px; display: none; }
     .dl-btn-modal.show { display: flex; }
     .dl-btn-modal:hover { background: rgba(255,55,95,0.18); transform: translateY(-1px); }
