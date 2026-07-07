@@ -95,7 +95,8 @@ app.get("/api/resolve", async (req, res) => {
   try {
     if (url.includes("pixeldrain.com")) {
       const direct = resolvePixeldrain(url);
-      return res.json({ type: "stream", url: direct });
+      const proxyUrl = "/api/stream?url=" + encodeURIComponent(direct);
+      return res.json({ type: "stream", url: proxyUrl, direct: direct });
     }
     if (url.includes("mediafire.com")) {
       const direct = await resolveMediafire(url);
@@ -103,6 +104,35 @@ app.get("/api/resolve", async (req, res) => {
     }
     res.json({ type: "unknown", url });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get("/api/stream", async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send("Missing url");
+  try {
+    const range = req.headers.range;
+    const headers = { "User-Agent": UA };
+    if (range) headers["Range"] = range;
+
+    const upstream = await axios.get(url, {
+      headers,
+      responseType: "stream",
+      validateStatus: function(s) { return s < 500; }
+    });
+
+    res.status(upstream.status);
+    var ct = upstream.headers["content-type"];
+    var cl = upstream.headers["content-length"];
+    var cr = upstream.headers["content-range"];
+    var ac = upstream.headers["accept-ranges"];
+    if (ct) res.setHeader("Content-Type", ct);
+    if (cl) res.setHeader("Content-Length", cl);
+    if (cr) res.setHeader("Content-Range", cr);
+    if (ac) res.setHeader("Accept-Ranges", ac || "bytes");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
+    upstream.data.pipe(res);
+  } catch (err) { res.status(500).send(err.message); }
 });
 
 app.get("/anime", (req, res) => {
@@ -116,4 +146,3 @@ app.get("*", (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("SauceNime running on port " + PORT));
 module.exports = app;
-    
