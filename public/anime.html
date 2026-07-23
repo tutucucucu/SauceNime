@@ -14,6 +14,7 @@
       --text: #f2f2f7; --muted: rgba(242,242,247,0.45); --dim: rgba(242,242,247,0.2);
       --accent: #bf5af2; --accent2: #7c3aed; --accent-dim: rgba(191,90,242,0.12);
       --pink: #ff375f; --shadow: 0 12px 48px rgba(0,0,0,0.8); --r: 18px; --r-sm: 11px;
+      --max-w: 700px;
     }
     [data-theme="light"] {
       --bg: #f0eef8; --surface: rgba(255,255,255,0.7); --surface-h: rgba(255,255,255,0.9);
@@ -21,18 +22,44 @@
       --text: #08080e; --muted: rgba(8,8,14,0.5); --dim: rgba(8,8,14,0.22);
       --shadow: 0 12px 48px rgba(0,0,0,0.1);
     }
+    /* Desktop mode */
+    .desktop { --max-w: 1100px; }
+    .desktop .anime-hero { padding: 24px 28px; gap: 28px; }
+    .desktop .anime-cover { width: 160px; height: 225px; }
+    .desktop .anime-title-main { font-size: 24px; }
+    .desktop .meta-row { font-size: 12px; }
+    .desktop .meta-key { width: 80px; }
+    .desktop .episodes-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .desktop .ep-card { border-radius: var(--r-sm); }
+    .desktop .synopsis-text { font-size: 14px; }
+    .desktop .genre-tag { font-size: 10px; padding: 4px 12px; }
+
     html, body { min-height: 100vh; font-family: 'Geist', sans-serif; background: var(--bg); color: var(--text); transition: background 0.35s, color 0.35s; overflow-x: hidden; }
     body::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 60% 50% at 20% 10%, rgba(191,90,242,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 55% at 80% 90%, rgba(255,55,95,0.06) 0%, transparent 60%); }
-    .wrap { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 32px 18px 80px; display: flex; flex-direction: column; gap: 20px; }
-    nav { display: flex; align-items: center; justify-content: space-between; }
+    .wrap { position: relative; z-index: 1; max-width: var(--max-w); margin: 0 auto; padding: 32px 18px 80px; display: flex; flex-direction: column; gap: 20px; transition: max-width 0.3s; }
+    nav { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .nav-left { display: flex; align-items: center; gap: 14px; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
     .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
     .brand-logo { width: 34px; height: 34px; border-radius: 9px; overflow: hidden; border: 1px solid var(--border-s); flex-shrink: 0; }
     .brand-logo img { width: 100%; height: 100%; object-fit: cover; }
     .brand-name { font-family: 'Geist Mono', monospace; font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
     .brand-name em { font-style: normal; color: var(--accent); }
+
+    /* Source Selector */
+    .source-selector { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; padding: 3px; }
+    .source-btn { padding: 5px 14px; border: none; border-radius: 100px; font-family: 'Geist Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--muted); }
+    .source-btn.active { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(191,90,242,0.25); }
+    .source-btn:hover:not(.active) { color: var(--text); }
+
+    /* Mode toggle */
+    .mode-btn { width: 42px; height: 25px; background: var(--surface); border: 1px solid var(--border-s); border-radius: 100px; cursor: pointer; position: relative; backdrop-filter: blur(12px); transition: background 0.3s; flex-shrink: 0; font-size: 10px; color: var(--dim); display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; letter-spacing: 0.04em; }
+    .mode-btn:hover { color: var(--text); }
+
     .theme-btn { width: 42px; height: 25px; background: var(--surface); border: 1px solid var(--border-s); border-radius: 100px; cursor: pointer; position: relative; backdrop-filter: blur(12px); transition: background 0.3s; flex-shrink: 0; }
     .theme-btn::after { content: ''; position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; border-radius: 50%; background: var(--text); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
     [data-theme="light"] .theme-btn::after { transform: translateX(17px); }
+
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); backdrop-filter: blur(28px) saturate(1.5); -webkit-backdrop-filter: blur(28px) saturate(1.5); box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.055); overflow: hidden; }
     [data-theme="light"] .card { box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.9); }
     .divider { height: 1px; background: var(--border); }
@@ -110,16 +137,35 @@
 
     footer { text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; }
     @keyframes up { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .desktop .episodes-wrap { grid-template-columns: 1fr; }
+      .desktop .anime-hero { flex-direction: column; align-items: center; text-align: center; }
+      .desktop .anime-cover { width: 130px; height: 185px; }
+      .desktop .anime-title-main { font-size: 20px; }
+      .source-selector { order: 3; width: 100%; justify-content: center; }
+      .nav-right { flex-wrap: wrap; justify-content: flex-end; }
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="appWrap">
   <nav>
-    <a class="brand" href="/">
-      <div class="brand-logo"><img src="/thumbnail.jpg" alt="SauceNime"/></div>
-      <div class="brand-name">Sauce<em>Nime</em></div>
-    </a>
-    <button class="theme-btn" id="themeBtn" type="button"></button>
+    <div class="nav-left">
+      <a class="brand" href="/">
+        <div class="brand-logo"><img src="/thumbnail.jpg" alt="SauceNime"/></div>
+        <div class="brand-name">Sauce<em>Nime</em></div>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div class="source-selector" id="sourceSelector">
+        <button class="source-btn active" data-source="samehadaku">Samehadaku</button>
+        <button class="source-btn" data-source="alqanime">Alqanime</button>
+      </div>
+      <button class="mode-btn" id="modeBtn" type="button">◇</button>
+      <button class="theme-btn" id="themeBtn" type="button"></button>
+    </div>
   </nav>
 
   <div id="pageContent">
@@ -167,6 +213,9 @@
 <script>
 (function() {
   var html = document.documentElement;
+  var wrap = document.getElementById('appWrap');
+  
+  // Theme
   html.setAttribute('data-theme', localStorage.getItem('sn-theme') || 'dark');
   document.getElementById('themeBtn').addEventListener('click', function() {
     var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -174,7 +223,21 @@
     localStorage.setItem('sn-theme', next);
   });
 
+  // Mode (Desktop/Mobile)
+  var modeBtn = document.getElementById('modeBtn');
+  var isDesktop = localStorage.getItem('sn-mode') === 'desktop';
+  if (isDesktop) wrap.classList.add('desktop');
+  modeBtn.textContent = isDesktop ? '⬛' : '◇';
+  modeBtn.addEventListener('click', function() {
+    wrap.classList.toggle('desktop');
+    var now = wrap.classList.contains('desktop');
+    localStorage.setItem('sn-mode', now ? 'desktop' : 'mobile');
+    modeBtn.textContent = now ? '⬛' : '◇';
+  });
+
+  // Source selector
   var params = new URLSearchParams(location.search);
+  var currentSource = params.get('source') || 'samehadaku';
   var animeUrl = params.get('url');
 
   if (!animeUrl) {
@@ -182,7 +245,22 @@
     return;
   }
 
-  fetch('/api/detail?url=' + encodeURIComponent(animeUrl))
+  // Highlight source
+  document.querySelectorAll('.source-btn').forEach(function(btn) {
+    if (btn.dataset.source === currentSource) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+    btn.addEventListener('click', function() {
+      var source = this.dataset.source;
+      var newUrl = '/anime?url=' + encodeURIComponent(animeUrl) + '&source=' + source;
+      location.href = newUrl;
+    });
+  });
+
+  // Load detail
+  fetch('/api/detail?url=' + encodeURIComponent(animeUrl) + '&source=' + encodeURIComponent(currentSource))
     .then(function(r) { if (!r.ok) throw new Error('Failed to load'); return r.json(); })
     .then(function(d) {
       document.title = (d.title || 'Anime') + ' — SauceNime';
@@ -195,9 +273,6 @@
   function renderPage(d) {
     var content = document.getElementById('pageContent');
 
-    var html_str = '';
-
-    // Hero card
     var metaRows = '';
     if (d.status) metaRows += metaRow('Status', d.status);
     if (d.type) metaRows += metaRow('Type', d.type);
@@ -206,6 +281,7 @@
     if (d.duration) metaRows += metaRow('Duration', d.duration);
     if (d.episodes) metaRows += metaRow('Episodes', d.episodes);
     if (d.subtitle) metaRows += metaRow('Sub', d.subtitle);
+    if (d.season) metaRows += metaRow('Season', d.season);
 
     var genreTags = (d.genre || []).map(function(g) { return '<span class="genre-tag">' + esc(g) + '</span>'; }).join('');
 
@@ -240,53 +316,106 @@
 
         var header = document.createElement('div');
         header.className = 'ep-header';
-        header.innerHTML = '<span class="ep-title">' + esc(ep.episode || 'Episode') + '</span>' +
+        var epDisplay = ep.episode || ep.title || 'Episode';
+        if (ep.number) epDisplay = 'Episode ' + ep.number;
+        header.innerHTML = '<span class="ep-title">' + esc(epDisplay) + '</span>' +
           '<svg class="ep-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
 
         var body = document.createElement('div');
         body.className = 'ep-body';
 
-        (ep.download || []).forEach(function(dl) {
-          if (!dl.providers || !dl.providers.length) return;
+        // For Samehadaku format (ep.download)
+        if (ep.download && ep.download.length) {
+          ep.download.forEach(function(dl) {
+            if (!dl.providers || !dl.providers.length) return;
 
-          var hasPixeldrain = dl.providers.some(function(p) { return p.url && p.url.includes('pixeldrain'); });
-          var hasMediafire = dl.providers.some(function(p) { return p.url && p.url.includes('mediafire'); });
+            var hasPixeldrain = dl.providers.some(function(p) { return p.url && p.url.includes('pixeldrain'); });
+            var hasMediafire = dl.providers.some(function(p) { return p.url && p.url.includes('mediafire'); });
 
-          if (!hasPixeldrain && !hasMediafire) return;
+            if (!hasPixeldrain && !hasMediafire) return;
 
+            var resSection = document.createElement('div');
+            resSection.className = 'res-section';
+
+            var resLabel = document.createElement('div');
+            resLabel.className = 'res-label';
+            resLabel.textContent = dl.resolution || 'Unknown';
+            resSection.appendChild(resLabel);
+
+            var provList = document.createElement('div');
+            provList.className = 'provider-list';
+
+            dl.providers.forEach(function(p) {
+              if (!p.url) return;
+              var isPx = p.url.includes('pixeldrain');
+              var isMf = p.url.includes('mediafire');
+              if (!isPx && !isMf) return;
+
+              var btn = document.createElement('button');
+              btn.className = 'provider-btn ' + (isPx ? 'px' : 'mf');
+              btn.textContent = isPx ? 'Pixeldrain' : 'MediaFire';
+              btn.setAttribute('data-url', p.url);
+              btn.setAttribute('data-type', isPx ? 'stream' : 'download');
+              btn.setAttribute('data-ep', epDisplay);
+              btn.setAttribute('data-res', dl.resolution || '');
+              btn.addEventListener('click', function() {
+                openModal(this.getAttribute('data-url'), this.getAttribute('data-ep'), this.getAttribute('data-res'));
+              });
+              provList.appendChild(btn);
+            });
+
+            resSection.appendChild(provList);
+            if (resSection.querySelector('.provider-btn')) body.appendChild(resSection);
+          });
+        }
+
+        // For Alqanime format (ep.url) - fallback
+        if (ep.url && !body.querySelector('.provider-btn')) {
           var resSection = document.createElement('div');
           resSection.className = 'res-section';
-
+          
           var resLabel = document.createElement('div');
           resLabel.className = 'res-label';
-          resLabel.textContent = dl.resolution || 'Unknown';
+          resLabel.textContent = 'Watch';
           resSection.appendChild(resLabel);
 
           var provList = document.createElement('div');
           provList.className = 'provider-list';
 
-          dl.providers.forEach(function(p) {
-            if (!p.url) return;
-            var isPx = p.url.includes('pixeldrain');
-            var isMf = p.url.includes('mediafire');
-            if (!isPx && !isMf) return;
-
-            var btn = document.createElement('button');
-            btn.className = 'provider-btn ' + (isPx ? 'px' : 'mf');
-            btn.textContent = isPx ? 'Pixeldrain' : 'MediaFire';
-            btn.setAttribute('data-url', p.url);
-            btn.setAttribute('data-type', isPx ? 'stream' : 'download');
-            btn.setAttribute('data-ep', ep.episode || '');
-            btn.setAttribute('data-res', dl.resolution || '');
-            btn.addEventListener('click', function() {
-              openModal(this.getAttribute('data-url'), this.getAttribute('data-ep'), this.getAttribute('data-res'));
-            });
-            provList.appendChild(btn);
+          var btn = document.createElement('button');
+          btn.className = 'provider-btn px';
+          btn.textContent = 'Stream';
+          btn.setAttribute('data-url', ep.url);
+          btn.setAttribute('data-type', 'stream');
+          btn.setAttribute('data-ep', epDisplay);
+          btn.setAttribute('data-res', '');
+          btn.addEventListener('click', function() {
+            // Try to get episode detail first
+            fetch('/api/episode?url=' + encodeURIComponent(this.getAttribute('data-url')))
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                if (data.downloads) {
+                  // Find first available quality
+                  var qualities = ['1080p', '720p', '480p', '360p'];
+                  for (var i = 0; i < qualities.length; i++) {
+                    var q = qualities[i];
+                    if (data.downloads[q] && data.downloads[q].stream_url) {
+                      openModal(data.downloads[q].stream_url, epDisplay, q);
+                      return;
+                    }
+                  }
+                }
+                // Fallback: try resolve directly
+                openModal(this.getAttribute('data-url'), epDisplay, '');
+              }.bind(this))
+              .catch(function() {
+                openModal(this.getAttribute('data-url'), epDisplay, '');
+              }.bind(this));
           });
-
+          provList.appendChild(btn);
           resSection.appendChild(provList);
-          if (resSection.querySelector('.provider-btn')) body.appendChild(resSection);
-        });
+          body.appendChild(resSection);
+        }
 
         header.addEventListener('click', function() {
           card.classList.toggle('open');
