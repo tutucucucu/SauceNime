@@ -23,6 +23,7 @@
       --pink: #ff375f;
       --shadow: 0 12px 48px rgba(0,0,0,0.8);
       --r: 18px; --r-sm: 11px;
+      --max-w: 680px;
     }
     [data-theme="light"] {
       --bg: #f0eef8;
@@ -35,6 +36,18 @@
       --dim: rgba(8,8,14,0.22);
       --shadow: 0 12px 48px rgba(0,0,0,0.1);
     }
+    /* Desktop mode */
+    .desktop { --max-w: 900px; }
+    .desktop .results-section { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .desktop .results-section .results-label { grid-column: 1 / -1; }
+    .desktop .search-inner { padding: 24px 28px; }
+    .desktop .search-input { font-size: 15px; padding: 16px 20px; }
+    .desktop .anime-card { flex-direction: column; }
+    .desktop .anime-thumb { width: 100%; height: 180px; }
+    .desktop .anime-info { padding: 14px 16px; }
+    .desktop .anime-title { font-size: 15px; }
+    .desktop .hero h1 { font-size: clamp(38px,9vw,68px); }
+
     html, body { min-height: 100vh; font-family: 'Geist', sans-serif; background: var(--bg); color: var(--text); transition: background 0.35s, color 0.35s; overflow-x: hidden; }
     body::before {
       content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -44,16 +57,30 @@
         radial-gradient(ellipse 40% 40% at 60% 40%, rgba(124,58,237,0.05) 0%, transparent 60%);
     }
     [data-theme="light"] body::before { opacity: 0.5; }
-    .wrap { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 40px 18px 80px; display: flex; flex-direction: column; gap: 24px; }
-    nav { display: flex; align-items: center; justify-content: space-between; animation: up 0.4s ease both; }
-    .brand { display: flex; align-items: center; gap: 10px; }
+    .wrap { position: relative; z-index: 1; max-width: var(--max-w); margin: 0 auto; padding: 40px 18px 80px; display: flex; flex-direction: column; gap: 24px; transition: max-width 0.3s; }
+    nav { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; animation: up 0.4s ease both; }
+    .nav-left { display: flex; align-items: center; gap: 14px; }
+    .nav-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
     .brand-logo { width: 36px; height: 36px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-s); flex-shrink: 0; }
     .brand-logo img { width: 100%; height: 100%; object-fit: cover; }
     .brand-name { font-family: 'Geist Mono', monospace; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
     .brand-name em { font-style: normal; color: var(--accent); }
+
+    /* Source Selector */
+    .source-selector { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; padding: 3px; }
+    .source-btn { padding: 5px 14px; border: none; border-radius: 100px; font-family: 'Geist Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--muted); }
+    .source-btn.active { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(191,90,242,0.25); }
+    .source-btn:hover:not(.active) { color: var(--text); }
+
+    /* Mode toggle */
+    .mode-btn { width: 42px; height: 25px; background: var(--surface); border: 1px solid var(--border-s); border-radius: 100px; cursor: pointer; position: relative; backdrop-filter: blur(12px); transition: background 0.3s; flex-shrink: 0; font-size: 10px; color: var(--dim); display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; letter-spacing: 0.04em; }
+    .mode-btn:hover { color: var(--text); }
+
     .theme-btn { width: 42px; height: 25px; background: var(--surface); border: 1px solid var(--border-s); border-radius: 100px; cursor: pointer; position: relative; backdrop-filter: blur(12px); transition: background 0.3s; flex-shrink: 0; }
     .theme-btn::after { content: ''; position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; border-radius: 50%; background: var(--text); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
     [data-theme="light"] .theme-btn::after { transform: translateX(17px); }
+
     .hero { text-align: center; padding: 16px 0 8px; animation: up 0.4s 0.07s ease both; }
     .hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; background: var(--accent-dim); border: 1px solid rgba(191,90,242,0.22); border-radius: 100px; font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
     .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease infinite; }
@@ -62,6 +89,7 @@
     .hero h1 em { font-style: normal; color: var(--accent); }
     .hero h1 strong { font-weight: 700; }
     .hero p { font-size: 13px; color: var(--muted); max-width: 380px; margin: 0 auto; line-height: 1.7; }
+
     .search-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); backdrop-filter: blur(28px) saturate(1.5); -webkit-backdrop-filter: blur(28px) saturate(1.5); box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.055); overflow: hidden; animation: up 0.4s 0.13s ease both; }
     [data-theme="light"] .search-card { box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.9); }
     .search-inner { padding: 20px; display: flex; gap: 8px; }
@@ -78,6 +106,7 @@
     .spinner { width: 16px; height: 16px; border: 2px solid var(--border-s); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-text { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
+
     .results-section { display: none; flex-direction: column; gap: 12px; animation: up 0.35s ease both; }
     .results-section.show { display: flex; }
     .results-label { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
@@ -89,20 +118,40 @@
     .anime-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .tag { padding: 2px 7px; background: var(--surface-h); border: 1px solid var(--border); border-radius: 100px; font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
     .tag.score { color: var(--accent); border-color: rgba(191,90,242,0.25); background: var(--accent-dim); }
+
     .err-msg { display: none; padding: 12px 16px; background: rgba(255,55,95,0.08); border: 1px solid rgba(255,55,95,0.2); border-radius: var(--r-sm); font-family: 'Geist Mono', monospace; font-size: 11px; color: rgba(255,100,130,0.9); }
     .err-msg.show { display: block; }
+
     footer { text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; }
     @keyframes up { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .desktop .results-section { grid-template-columns: 1fr; }
+      .desktop .anime-thumb { height: 100px; width: 72px; }
+      .desktop .anime-card { flex-direction: row; }
+      .source-selector { order: 3; width: 100%; justify-content: center; }
+      .nav-right { flex-wrap: wrap; justify-content: flex-end; }
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="appWrap">
   <nav>
-    <div class="brand">
-      <div class="brand-logo"><img src="/thumbnail.jpg" alt="SauceNime"/></div>
-      <div class="brand-name">Sauce<em>Nime</em></div>
+    <div class="nav-left">
+      <a class="brand" href="/">
+        <div class="brand-logo"><img src="/thumbnail.jpg" alt="SauceNime"/></div>
+        <div class="brand-name">Sauce<em>Nime</em></div>
+      </a>
     </div>
-    <button class="theme-btn" id="themeBtn" type="button"></button>
+    <div class="nav-right">
+      <div class="source-selector" id="sourceSelector">
+        <button class="source-btn active" data-source="samehadaku">Samehadaku</button>
+        <button class="source-btn" data-source="alqanime">Alqanime</button>
+      </div>
+      <button class="mode-btn" id="modeBtn" type="button">◇</button>
+      <button class="theme-btn" id="themeBtn" type="button"></button>
+    </div>
   </nav>
 
   <div class="hero">
@@ -138,11 +187,43 @@
 <script>
 (function() {
   var html = document.documentElement;
+  var wrap = document.getElementById('appWrap');
+
+  // Theme
   html.setAttribute('data-theme', localStorage.getItem('sn-theme') || 'dark');
   document.getElementById('themeBtn').addEventListener('click', function() {
     var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('sn-theme', next);
+  });
+
+  // Mode (Desktop/Mobile)
+  var modeBtn = document.getElementById('modeBtn');
+  var isDesktop = localStorage.getItem('sn-mode') === 'desktop';
+  if (isDesktop) wrap.classList.add('desktop');
+  modeBtn.textContent = isDesktop ? '⬛' : '◇';
+  modeBtn.addEventListener('click', function() {
+    wrap.classList.toggle('desktop');
+    var now = wrap.classList.contains('desktop');
+    localStorage.setItem('sn-mode', now ? 'desktop' : 'mobile');
+    modeBtn.textContent = now ? '⬛' : '◇';
+  });
+
+  // Source selector
+  var currentSource = 'samehadaku';
+
+  document.querySelectorAll('.source-btn').forEach(function(btn) {
+    if (btn.dataset.source === currentSource) {
+      btn.classList.add('active');
+    }
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.source-btn').forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      currentSource = this.dataset.source;
+      // If there's a search query, re-search
+      var q = searchInput.value.trim();
+      if (q) doSearch();
+    });
   });
 
   var searchInput = document.getElementById('searchInput');
@@ -162,25 +243,28 @@
     loadingRow.classList.add('show');
     searchBtn.disabled = true;
 
-    fetch('/api/search?q=' + encodeURIComponent(q))
+    fetch('/api/search?q=' + encodeURIComponent(q) + '&source=' + encodeURIComponent(currentSource))
       .then(function(r) { if (!r.ok) throw new Error('Request failed'); return r.json(); })
       .then(function(data) {
         loadingRow.classList.remove('show');
         searchBtn.disabled = false;
 
-        if (!data.length) {
-          errMsg.textContent = 'No results found for "' + q + '"';
+        var results = data.results || data;
+        var sourceName = data.source || currentSource;
+
+        if (!results || !results.length) {
+          errMsg.textContent = 'No results found for "' + q + '" on ' + sourceName;
           errMsg.classList.add('show');
           return;
         }
 
-        resultsLabel.textContent = data.length + ' results for "' + q + '"';
+        resultsLabel.textContent = results.length + ' results from ' + sourceName + ' for "' + q + '"';
         resultsList.innerHTML = '';
 
-        data.forEach(function(item) {
+        results.forEach(function(item) {
           var card = document.createElement('a');
           card.className = 'anime-card';
-          card.href = '/anime?url=' + encodeURIComponent(item.url);
+          card.href = '/anime?url=' + encodeURIComponent(item.url) + '&source=' + encodeURIComponent(currentSource);
 
           var img = document.createElement('img');
           img.className = 'anime-thumb';
@@ -221,6 +305,14 @@
 
   searchBtn.addEventListener('click', doSearch);
   searchInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
+
+  // Auto-search if URL has ?q= parameter
+  var params = new URLSearchParams(location.search);
+  var queryParam = params.get('q');
+  if (queryParam) {
+    searchInput.value = queryParam;
+    doSearch();
+  }
 })();
 </script>
 </body>
